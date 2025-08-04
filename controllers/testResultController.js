@@ -1,5 +1,6 @@
 const TestResult = require('../models/TestResult')
 
+// @desc    Submit a Test Result (Student)
 exports.submitResult = async (req, res) => {
   try {
     const { testType, score } = req.body
@@ -17,6 +18,7 @@ exports.submitResult = async (req, res) => {
   }
 }
 
+// @desc    Get All Test Results (Teacher)
 exports.getAllResults = async (req, res) => {
   try {
     const results = await TestResult.find().populate('student', 'name email')
