@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
 const lessonRoutes = require('./routes/lessonRoutes')
 app.use('/api/lessons', lessonRoutes)
 
+
 // MongoDB Connection
 mongoose
 	.connect(process.env.MONGO_URI)

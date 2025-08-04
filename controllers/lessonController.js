@@ -1,5 +1,19 @@
 const Lesson = require('../models/Lesson')
 
+exports.createLesson = async (req, res) => {
+	try {
+		const { title, description } = req.body
+		const lesson = await Lesson.create({
+			title,
+			description,
+			createdBy: req.user.id
+		})
+		res.status(201).json(lesson)
+	} catch (err) {
+		res.status(500).json({ message: 'Server Error', error: err.message })
+	}
+}
+
 exports.getLessons = async (req, res) => {
 	try {
 		const lessons = await Lesson.find({ createdBy: req.user.id })
@@ -9,16 +23,15 @@ exports.getLessons = async (req, res) => {
 	}
 }
 
-exports.createLesson = async (req, res) => {
+exports.updateLesson = async (req, res) => {
 	try {
 		const { title, description } = req.body
-		const newLesson = new Lesson({
-			title,
-			description,
-			createdBy: req.user.id,
-		})
-		await newLesson.save()
-		res.status(201).json(newLesson)
+		const lesson = await Lesson.findByIdAndUpdate(
+			req.params.id,
+			{ title, description },
+			{ new: true }
+		)
+		res.json(lesson)
 	} catch (err) {
 		res.status(500).json({ message: 'Server Error', error: err.message })
 	}
