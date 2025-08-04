@@ -15,12 +15,13 @@ app.use(express.json())
 // Routes
 const authRoutes = require('./routes/authRoutes')
 const lessonRoutes = require('./routes/lessonRoutes')
-const testResultRoutes = require('./routes/testResultRoutes')
+const resultRoutes = require('./routes/resultRoutes')
 
 // API Routes
 app.use('/api/auth', authRoutes)
 app.use('/api/lessons', lessonRoutes)
-app.use('/api/test-results', testResultRoutes)
+
+app.use('/api/results', resultRoutes)
 
 // Home route
 app.get('/', (req, res) => {
