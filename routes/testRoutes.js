@@ -2,15 +2,15 @@ const express = require('express')
 const router = express.Router()
 const { protect, teacherOnly } = require('../middlewares/authMiddleware')
 const {
-  createTest,
-  getAllTests,
-  updateTest,
-  deleteTest
-} = require('../controllers/testController')
+	createTest,
+	getAllTests,
+	updateTest,
+	deleteTest,
+} = require('../controllers/testController') // submitResult olib tashlandi
 
-// Protected Routes - Teachers Only
-router.post('/', protect, teacherOnly, createTest)
-router.get('/', protect, teacherOnly, getAllTests)
+// Test uchun route-lar
+router.post('/', protect, createTest)
+router.get('/all', protect, teacherOnly, getAllTests)
 router.put('/:id', protect, teacherOnly, updateTest)
 router.delete('/:id', protect, teacherOnly, deleteTest)
 
