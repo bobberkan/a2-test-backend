@@ -18,6 +18,9 @@ app.get('/', (req, res) => {
 	res.send('A2 Test Backend API is Running')
 })
 
+const lessonRoutes = require('./routes/lessonRoutes')
+app.use('/api/lessons', lessonRoutes)
+
 // MongoDB Connection
 mongoose
 	.connect(process.env.MONGO_URI)
