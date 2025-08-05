@@ -46,7 +46,7 @@ exports.createListeningTest = async (req, res) => {
 
 exports.getAvailableListeningTest = async (req, res) => {
 	try {
-		const test = await ListeningTest.findOne()
+		const test = await ListeningTest.find()
 		if (!test) {
 			return res.status(404).json({ message: 'No Listening Tests available' })
 		}
