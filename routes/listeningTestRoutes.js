@@ -1,24 +1,25 @@
 const express = require('express')
-const router = express.Router()
-const { protect, teacherOnly } = require('../middlewares/authMiddleware')
 const multer = require('multer')
-const upload = multer({ dest: 'uploads/' })
-
 const {
 	createListeningTest,
 	getAllListeningTests,
 } = require('../controllers/listeningTestController')
+const { protect } = require('../middlewares/authMiddleware')
 
-// Teacher Upload Test
-router.post(
-	'/',
-	protect,
-	teacherOnly,
-	upload.single('audio'),
-	createListeningTest
-)
+const router = express.Router()
 
-// Students View Tests
+const storage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		cb(null, 'uploads/') // Fayllar uploads/ papkaga saqlanadi
+	},
+	filename: function (req, file, cb) {
+		cb(null, Date.now() + '-' + file.originalname)
+	},
+})
+
+const upload = multer({ storage })
+
+router.post('/', protect, upload.single('audio'), createListeningTest)
 router.get('/', protect, getAllListeningTests)
 
 module.exports = router

@@ -1,10 +1,13 @@
 const ListeningTest = require('../models/ListeningTest')
 
-// Upload Listening Test
 exports.createListeningTest = async (req, res) => {
 	try {
-		const { title, questions } = req.body
-		const audioUrl = req.file.path // Multer uploads audio here
+		const { title } = req.body
+		const questions = JSON.parse(req.body.questions)
+
+		const audioUrl = `${req.protocol}://${req.get('host')}/uploads/${
+			req.file.filename
+		}`
 
 		const newTest = await ListeningTest.create({
 			title,
@@ -19,7 +22,6 @@ exports.createListeningTest = async (req, res) => {
 	}
 }
 
-// Get All Listening Tests
 exports.getAllListeningTests = async (req, res) => {
 	try {
 		const tests = await ListeningTest.find()
