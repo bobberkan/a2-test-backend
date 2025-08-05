@@ -8,14 +8,26 @@ exports.createListeningTest = async (req, res) => {
 		console.log('Body:', req.body)
 
 		const { title } = req.body
-		const questions = JSON.parse(req.body.questions)
+		let questions = []
+
+		try {
+			questions = JSON.parse(req.body.questions)
+		} catch (parseError) {
+			return res.status(400).json({ message: 'Invalid questions format' })
+		}
 
 		if (!req.file) {
 			return res.status(400).json({ message: 'No audio file uploaded' })
 		}
 
 		const fileName = `${Date.now()}_${req.file.originalname}`
-		const filePath = path.join(__dirname, '..', 'uploads', fileName)
+		const uploadsDir = path.join(__dirname, '..', 'uploads')
+
+		if (!fs.existsSync(uploadsDir)) {
+			fs.mkdirSync(uploadsDir)
+		}
+
+		const filePath = path.join(uploadsDir, fileName)
 		fs.writeFileSync(filePath, req.file.buffer)
 
 		const newTest = await ListeningTest.create({
