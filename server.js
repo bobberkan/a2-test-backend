@@ -15,13 +15,11 @@ app.use(express.json())
 // Routes
 const authRoutes = require('./routes/authRoutes')
 const lessonRoutes = require('./routes/lessonRoutes')
-const resultRoutes = require('./routes/resultRoutes') // For result submission & fetching
 const testRoutes = require('./routes/testRoutes') // For test CRUD operations
 
 // API Endpoints
 app.use('/api/auth', authRoutes)
 app.use('/api/lessons', lessonRoutes)
-app.use('/api/results', resultRoutes)
 app.use('/api/tests', testRoutes)
 
 // Home route
