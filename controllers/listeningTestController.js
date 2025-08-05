@@ -1,8 +1,12 @@
 const ListeningTest = require('../models/ListeningTest')
+const path = require('path')
+const fs = require('fs')
 
-// Upload Listening Test
 exports.createListeningTest = async (req, res) => {
 	try {
+		console.log('File:', req.file)
+		console.log('Body:', req.body)
+
 		const { title } = req.body
 		const questions = JSON.parse(req.body.questions)
 
@@ -10,9 +14,13 @@ exports.createListeningTest = async (req, res) => {
 			return res.status(400).json({ message: 'No audio file uploaded' })
 		}
 
+		const fileName = `${Date.now()}_${req.file.originalname}`
+		const filePath = path.join(__dirname, '..', 'uploads', fileName)
+		fs.writeFileSync(filePath, req.file.buffer)
+
 		const newTest = await ListeningTest.create({
 			title,
-			audioUrl: req.file.filename, // Faqat filename saqlaymiz
+			audioUrl: fileName,
 			questions,
 			createdBy: req.user.id,
 		})
@@ -24,10 +32,9 @@ exports.createListeningTest = async (req, res) => {
 	}
 }
 
-
 exports.getAvailableListeningTest = async (req, res) => {
 	try {
-		const test = await ListeningTest.findOne() // Hozircha eng birinchi testni qaytaramiz
+		const test = await ListeningTest.findOne()
 		if (!test) {
 			return res.status(404).json({ message: 'No Listening Tests available' })
 		}
