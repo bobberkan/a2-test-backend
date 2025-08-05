@@ -23,3 +23,17 @@ exports.createListeningTest = async (req, res) => {
 		res.status(500).json({ message: 'Server Error', error: err.message })
 	}
 }
+
+
+exports.getAvailableListeningTest = async (req, res) => {
+	try {
+		const test = await ListeningTest.findOne() // Hozircha eng birinchi testni qaytaramiz
+		if (!test) {
+			return res.status(404).json({ message: 'No Listening Tests available' })
+		}
+		res.json(test)
+	} catch (err) {
+		console.error(err)
+		res.status(500).json({ message: 'Server Error' })
+	}
+}
