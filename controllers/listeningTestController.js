@@ -56,3 +56,24 @@ exports.getAvailableListeningTest = async (req, res) => {
 		res.status(500).json({ message: 'Server Error' })
 	}
 }
+
+exports.deleteListeningTest = async (req, res) => {
+	try {
+		const test = await ListeningTest.findById(req.params.id)
+		if (!test) {
+			return res.status(404).json({ message: 'Test not found' })
+		}
+
+		// Delete audio file
+		const filePath = path.join(__dirname, '..', 'uploads', test.audioUrl)
+		if (fs.existsSync(filePath)) {
+			fs.unlinkSync(filePath)
+		}
+
+		await test.remove()
+		res.json({ message: 'Test deleted successfully' })
+	} catch (err) {
+		console.error('Error deleting test:', err)
+		res.status(500).json({ message: 'Server Error' })
+	}
+}
