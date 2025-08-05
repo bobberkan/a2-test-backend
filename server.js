@@ -4,14 +4,19 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const path = require('path')
 
+// Load env variables
 dotenv.config()
 
 const app = express()
 
+// Middlewares
 app.use(cors())
 app.use(express.json())
+
+// Serve static uploads folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
+// Routes
 const authRoutes = require('./routes/authRoutes')
 const lessonRoutes = require('./routes/lessonRoutes')
 const resultRoutes = require('./routes/resultRoutes')

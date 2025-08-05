@@ -7,7 +7,15 @@ const { protect } = require('../middlewares/authMiddleware')
 
 const router = express.Router()
 
-const storage = multer.memoryStorage() // Using memoryStorage
+// Disk Storage Multer config
+const storage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		cb(null, 'uploads/')
+	},
+	filename: function (req, file, cb) {
+		cb(null, Date.now() + '_' + file.originalname)
+	},
+})
 const upload = multer({ storage })
 
 router.post('/', protect, upload.single('audio'), createListeningTest)
