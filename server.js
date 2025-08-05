@@ -17,12 +17,18 @@ const authRoutes = require('./routes/authRoutes')
 const lessonRoutes = require('./routes/lessonRoutes')
 const resultRoutes = require('./routes/resultRoutes') // For result submission & fetching
 const testRoutes = require('./routes/testRoutes') // For test CRUD operations
+const listeningTestRoutes = require('./routes/listeningTestRoutes')
+
 
 // API Endpoints
 app.use('/api/auth', authRoutes)
 app.use('/api/lessons', lessonRoutes)
 app.use('/api/results', resultRoutes)
 app.use('/api/tests', testRoutes)
+app.use('/api/listening-tests', listeningTestRoutes)
+app.use('/uploads', express.static('uploads'))
+
+
 
 // Home route
 app.get('/', (req, res) => {
