@@ -2,9 +2,9 @@ const express = require('express')
 const multer = require('multer')
 const { protect } = require('../middlewares/authMiddleware')
 const {
-    createListeningTest,
-    getAllListeningTests,
-    deleteListeningTest,
+	createListeningTest,
+	getAllListeningTests,
+	deleteListeningTest,
 } = require('../controllers/listeningTestController')
 
 const router = express.Router()

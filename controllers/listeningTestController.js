@@ -1,7 +1,9 @@
 const ListeningTest = require('../models/ListeningTest')
 const path = require('path')
 const fs = require('fs')
+const mongoose = require('mongoose') // MUHIM: mongoose shu yerda bo'lishi kerak
 
+// CREATE
 exports.createListeningTest = async (req, res) => {
 	try {
 		const { title } = req.body
@@ -34,6 +36,7 @@ exports.createListeningTest = async (req, res) => {
 	}
 }
 
+// READ
 exports.getAllListeningTests = async (req, res) => {
 	try {
 		const tests = await ListeningTest.find()
@@ -44,14 +47,18 @@ exports.getAllListeningTests = async (req, res) => {
 	}
 }
 
+// DELETE
 exports.deleteListeningTest = async (req, res) => {
 	try {
-		const test = await ListeningTest.findById(req.params.id)
+		const { id } = req.params
+
+		if (!mongoose.Types.ObjectId.isValid(id)) {
+			return res.status(400).json({ message: 'Invalid ID format' })
+		}
+
+		const test = await ListeningTest.findById(id)
 		if (!test) {
 			return res.status(404).json({ message: 'Test not found' })
-		}
-		if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-			return res.status(400).json({ message: 'Invalid ID format' })
 		}
 
 		// Delete the audio file
@@ -60,7 +67,7 @@ exports.deleteListeningTest = async (req, res) => {
 			fs.unlinkSync(filePath)
 		}
 
-		await ListeningTest.findByIdAndDelete(req.params.id)
+		await ListeningTest.findByIdAndDelete(id)
 		res.json({ message: 'Test deleted successfully' })
 	} catch (err) {
 		console.error('Error deleting Listening Test:', err)
