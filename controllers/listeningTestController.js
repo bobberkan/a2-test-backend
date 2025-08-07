@@ -1,84 +1,75 @@
-const fsPromises = require('fs').promises
-const mongoose = require('mongoose')
 const ListeningTest = require('../models/ListeningTest')
+const fs = require('fs')
 const path = require('path')
 
-// CREATE
+// @desc    Create new listening test
+// @route   POST /api/listening-tests
+// @access  Private (teacher only)
 exports.createListeningTest = async (req, res) => {
 	try {
-		const { title } = req.body
-		const questions = JSON.parse(req.body.questions)
+		const { title, questions } = req.body
+		const audioFile = req.file
 
-		if (!req.file) {
-			return res.status(400).json({ message: 'No audio file uploaded' })
+		if (!audioFile) {
+			return res.status(400).json({ message: 'Audio file is required' })
 		}
 
-		const uploadsDir = path.join(__dirname, '..', 'uploads')
-		if (!fs.existsSync(uploadsDir)) {
-			fs.mkdirSync(uploadsDir)
-		}
-
-		const fileName = `${Date.now()}_${req.file.originalname}`
-		const filePath = path.join(uploadsDir, fileName)
-		fs.writeFileSync(filePath, req.file.buffer)
-
-		const newTest = await ListeningTest.create({
+		const newTest = new ListeningTest({
 			title,
-			audioUrl: fileName,
-			questions,
-			createdBy: req.user.id,
+			audioUrl: `/uploads/${audioFile.filename}`,
+			questions: JSON.parse(questions),
 		})
 
+		await newTest.save()
 		res.status(201).json(newTest)
 	} catch (err) {
-		console.error('Error creating Listening Test:', err)
-		res.status(500).json({ message: 'Server Error' })
+		console.error('Error creating test:', err)
+		res.status(500).json({ message: 'Server error while creating test' })
 	}
 }
 
-// READ
-exports.getAllListeningTests = async (req, res) => {
+// @desc    Get all listening tests
+// @route   GET /api/listening-tests
+// @access  Public (or student)
+exports.getListeningTests = async (req, res) => {
 	try {
 		const tests = await ListeningTest.find()
 		res.json(tests)
 	} catch (err) {
-		console.error(err)
-		res.status(500).json({ message: 'Server Error' })
+		console.error('Error fetching tests:', err)
+		res.status(500).json({ message: 'Server error while fetching tests' })
 	}
 }
 
-// DELETE
+// @desc    Delete a listening test
+// @route   DELETE /api/listening-tests/:id
+// @access  Private (teacher only)
 exports.deleteListeningTest = async (req, res) => {
 	try {
 		const { id } = req.params
-		console.log('Received delete request for ID:', id)
-
-		if (!mongoose.Types.ObjectId.isValid(id)) {
-			console.error('Invalid ID format.')
-			return res.status(400).json({ message: 'Invalid test ID format' })
-		}
+		console.log(`Received delete request for ID: ${id}`)
 
 		const test = await ListeningTest.findById(id)
 		if (!test) {
-			console.error('Test not found in database.')
 			return res.status(404).json({ message: 'Test not found' })
 		}
 
-		const filePath = path.join(__dirname, '..', 'uploads', test.audioUrl)
-		console.log('File path:', filePath, 'Exists:', fs.existsSync(filePath))
-
-		if (fs.existsSync(filePath)) {
-			await fs.promises.unlink(filePath)
-			console.log('File deleted successfully.')
-		} else {
-			console.warn('File not found, skipping deletion.')
-		}
+		// Remove audio file from uploads
+		const filePath = path.join(
+			__dirname,
+			'..',
+			'uploads',
+			path.basename(test.audioUrl)
+		)
+		fs.unlink(filePath, err => {
+			if (err) console.warn('Could not delete audio file:', err.message)
+		})
 
 		await ListeningTest.findByIdAndDelete(id)
-		console.log('Database entry deleted.')
-		res.json({ message: 'Test deleted successfully' })
+
+		res.json({ message: 'Listening test deleted successfully' })
 	} catch (err) {
 		console.error('Error during deletion:', err)
-		res.status(500).json({ message: 'Server Error while deleting test' })
+		res.status(500).json({ message: 'Server error while deleting test' })
 	}
 }

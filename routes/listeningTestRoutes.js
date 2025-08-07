@@ -1,19 +1,30 @@
 const express = require('express')
-const multer = require('multer')
-const { protect } = require('../middlewares/authMiddleware')
-const {
-	createListeningTest,
-	getAllListeningTests,
-	deleteListeningTest,
-} = require('../controllers/listeningTestController')
-
 const router = express.Router()
+const multer = require('multer')
+const path = require('path')
+const listeningTestController = require('../controllers/listeningTestController')
 
-const storage = multer.memoryStorage()
+// Multer settings for audio upload
+const storage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		cb(null, 'uploads/')
+	},
+	filename: function (req, file, cb) {
+		cb(null, Date.now() + '-' + file.originalname)
+	},
+})
+
 const upload = multer({ storage })
 
-router.post('/', protect, upload.single('audio'), createListeningTest)
-router.get('/', protect, getAllListeningTests)
-router.delete('/:id', protect, deleteListeningTest)
+// Routes
+router.post(
+	'/',
+	upload.single('audio'),
+	listeningTestController.createListeningTest
+)
+
+router.get('/', listeningTestController.getListeningTests)
+
+router.delete('/:id', listeningTestController.deleteListeningTest)
 
 module.exports = router

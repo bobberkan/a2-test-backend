@@ -4,24 +4,24 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const path = require('path')
 
-// Load env variables
+// Load environment variables
 dotenv.config()
 
 const app = express()
 
-// Middlewares
+// CORS
 app.use(
 	cors({
-		origin: ['http://localhost:5173', 'https://a2-test-frontend.vercel.app/'], // ← 2 ta origin bo‘lishi mumkin
-		methods: ['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS'],
+		origin: 'http://localhost:5173', // yoki Vercel frontendi bo‘lsa, uni yozing
+		methods: ['GET', 'POST', 'PUT', 'DELETE'],
 		allowedHeaders: ['Content-Type', 'Authorization'],
 	})
 )
 
+// Body parser
 app.use(express.json())
-app.use(express.urlencoded({ extended: true })) // ← file upload bo‘lsa kerak bo‘ladi
 
-// Serve static files
+// Serve static files (audio uploads)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 // Routes
@@ -37,30 +37,20 @@ app.use('/api/results', resultRoutes)
 app.use('/api/tests', testRoutes)
 app.use('/api/listening-tests', listeningTestRoutes)
 
+// Home route
 app.get('/', (req, res) => {
 	res.send('A2 Test Backend API is Running')
 })
 
-// Global error handler (foydali log uchun)
-app.use((err, req, res, next) => {
-	console.error('❌ Global Error:', err.stack)
-	res.status(500).json({ message: 'Internal Server Error' })
-})
-
+// Connect to MongoDB and start server
 const PORT = process.env.PORT || 5000
 
-// Connect to MongoDB and start server
 mongoose
-	.connect(process.env.MONGO_URI, {
-		useNewUrlParser: true,
-		useUnifiedTopology: true,
-	})
+	.connect(process.env.MONGO_URI)
 	.then(() => {
 		console.log('MongoDB Connected')
-		app.listen(PORT, () =>
-			console.log(`Server running on http://localhost:${PORT}`)
-		)
+		app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
 	})
 	.catch(err => {
-		console.error('MongoDB Connection Failed', err)
+		console.error('MongoDB Connection Failed:', err)
 	})
