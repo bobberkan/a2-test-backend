@@ -4,7 +4,7 @@ const multer = require('multer')
 const path = require('path')
 const listeningTestController = require('../controllers/listeningTestController')
 
-// Multer settings for audio upload
+// Multer storage config
 const storage = multer.diskStorage({
 	destination: function (req, file, cb) {
 		cb(null, 'uploads/')
@@ -22,9 +22,7 @@ router.post(
 	upload.single('audio'),
 	listeningTestController.createListeningTest
 )
-
-router.get('/', listeningTestController.getListeningTests)
-
+router.get('/', listeningTestController.getAllListeningTests)
 router.delete('/:id', listeningTestController.deleteListeningTest)
 
 module.exports = router

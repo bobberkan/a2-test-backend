@@ -1,21 +1,15 @@
 const mongoose = require('mongoose')
 
+const questionSchema = new mongoose.Schema({
+	question: String,
+	options: [String],
+	correctAnswer: String,
+})
+
 const listeningTestSchema = new mongoose.Schema({
 	title: { type: String, required: true },
-	audioUrl: { type: String, required: true },
-	questions: [
-		{
-			questionText: { type: String, required: true },
-			options: [{ type: String, required: true }],
-			correctAnswer: { type: String, required: true },
-		},
-	],
-	createdBy: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'User',
-		required: true,
-	},
-	createdAt: { type: Date, default: Date.now },
+	audioFilePath: { type: String, required: true },
+	questions: [questionSchema],
 })
 
 module.exports = mongoose.model('ListeningTest', listeningTestSchema)
