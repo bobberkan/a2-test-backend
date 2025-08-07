@@ -1,7 +1,7 @@
+const fsPromises = require('fs').promises
+const mongoose = require('mongoose')
 const ListeningTest = require('../models/ListeningTest')
 const path = require('path')
-const fs = require('fs')
-const mongoose = require('mongoose') // MUHIM: mongoose shu yerda bo'lishi kerak
 
 // CREATE
 exports.createListeningTest = async (req, res) => {
@@ -51,9 +51,8 @@ exports.getAllListeningTests = async (req, res) => {
 exports.deleteListeningTest = async (req, res) => {
 	try {
 		const { id } = req.params
-
 		if (!mongoose.Types.ObjectId.isValid(id)) {
-			return res.status(400).json({ message: 'Invalid ID format' })
+			return res.status(400).json({ message: 'Invalid test ID format' })
 		}
 
 		const test = await ListeningTest.findById(id)
@@ -61,16 +60,19 @@ exports.deleteListeningTest = async (req, res) => {
 			return res.status(404).json({ message: 'Test not found' })
 		}
 
-		// Delete the audio file
 		const filePath = path.join(__dirname, '..', 'uploads', test.audioUrl)
+		console.log('Attempting to delete file:', filePath)
 		if (fs.existsSync(filePath)) {
-			fs.unlinkSync(filePath)
+			await fsPromises.unlink(filePath)
+			console.log('Input audio file deleted.')
+		} else {
+			console.warn('File not found, skipping unlink.')
 		}
 
 		await ListeningTest.findByIdAndDelete(id)
 		res.json({ message: 'Test deleted successfully' })
 	} catch (err) {
 		console.error('Error deleting Listening Test:', err)
-		res.status(500).json({ message: 'Server Error' })
+		res.status(500).json({ message: 'Server Error while deleting test' })
 	}
 }
