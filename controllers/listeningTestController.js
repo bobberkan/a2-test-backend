@@ -14,8 +14,9 @@ exports.createListeningTest = async (req, res) => {
 
 		const newTest = new ListeningTest({
 			title,
-			audioFilePath: audioFile.path,
+			audioUrl: `/uploads/${audioFile.filename}`, // ← path emas, URL
 			questions: parsedQuestions,
+			// createdBy: req.user._id ← agar auth ishlayotgan bo‘lsa
 		})
 
 		await newTest.save()
@@ -44,8 +45,10 @@ exports.deleteListeningTest = async (req, res) => {
 			return res.status(404).json({ message: 'Test not found' })
 		}
 
-		if (test.audioFilePath && fs.existsSync(test.audioFilePath)) {
-			fs.unlinkSync(test.audioFilePath)
+		// Delete audio file if exists
+		const filePath = path.join(__dirname, '..', test.audioUrl)
+		if (fs.existsSync(filePath)) {
+			fs.unlinkSync(filePath)
 		}
 
 		await ListeningTest.findByIdAndDelete(id)
