@@ -2,59 +2,64 @@ const ListeningTest = require('../models/ListeningTest')
 const fs = require('fs')
 const path = require('path')
 
+// POST - Yangi test yuklash
 exports.createListeningTest = async (req, res) => {
 	try {
-		const { title, questions } = req.body
-		const parsedQuestions = JSON.parse(questions)
-		const audioFile = req.file
+		const { title } = req.body
+		const questions = JSON.parse(req.body.questions)
 
-		if (!audioFile) {
-			return res.status(400).json({ message: 'Audio file is required' })
+		if (!req.file) {
+			return res.status(400).json({ error: 'Audio file is required' })
 		}
+
+		const audioUrl = `/uploads/${req.file.filename}`
 
 		const newTest = new ListeningTest({
 			title,
-			audioUrl: `/uploads/${audioFile.filename}`, // ← path emas, URL
-			questions: parsedQuestions,
-			// createdBy: req.user._id ← agar auth ishlayotgan bo‘lsa
+			audioUrl,
+			questions,
 		})
 
 		await newTest.save()
 		res.status(201).json(newTest)
 	} catch (error) {
-		console.error('Error uploading listening test:', error)
-		res.status(500).json({ message: 'Server error' })
+		console.error('Error in createListeningTest:', error)
+		res.status(500).json({ error: 'Server error during test creation' })
 	}
 }
 
+// GET - Barcha testlarni olish
 exports.getAllListeningTests = async (req, res) => {
 	try {
 		const tests = await ListeningTest.find()
-		res.status(200).json(tests)
+		res.json(tests)
 	} catch (error) {
-		console.error('Error fetching listening tests:', error)
-		res.status(500).json({ message: 'Server error' })
+		res.status(500).json({ error: 'Server error' })
 	}
 }
 
+// DELETE - Testni o‘chirish
 exports.deleteListeningTest = async (req, res) => {
 	try {
-		const { id } = req.params
-		const test = await ListeningTest.findById(id)
+		const test = await ListeningTest.findById(req.params.id)
 		if (!test) {
-			return res.status(404).json({ message: 'Test not found' })
+			return res.status(404).json({ error: 'Test not found' })
 		}
 
-		// Delete audio file if exists
-		const filePath = path.join(__dirname, '..', test.audioUrl)
-		if (fs.existsSync(filePath)) {
-			fs.unlinkSync(filePath)
+		const audioPath = path.join(
+			__dirname,
+			'..',
+			'uploads',
+			path.basename(test.audioUrl)
+		)
+		if (fs.existsSync(audioPath)) {
+			fs.unlinkSync(audioPath)
 		}
 
-		await ListeningTest.findByIdAndDelete(id)
-		res.status(200).json({ message: 'Test deleted successfully' })
+		await ListeningTest.findByIdAndDelete(req.params.id)
+		res.json({ message: 'Test deleted' })
 	} catch (error) {
-		console.error('Error deleting listening test:', error)
-		res.status(500).json({ message: 'Server error' })
+		console.error('Error during deletion:', error)
+		res.status(500).json({ error: 'Server error during deletion' })
 	}
 }
