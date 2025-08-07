@@ -51,28 +51,34 @@ exports.getAllListeningTests = async (req, res) => {
 exports.deleteListeningTest = async (req, res) => {
 	try {
 		const { id } = req.params
+		console.log('Received delete request for ID:', id)
+
 		if (!mongoose.Types.ObjectId.isValid(id)) {
+			console.error('Invalid ID format.')
 			return res.status(400).json({ message: 'Invalid test ID format' })
 		}
 
 		const test = await ListeningTest.findById(id)
 		if (!test) {
+			console.error('Test not found in database.')
 			return res.status(404).json({ message: 'Test not found' })
 		}
 
 		const filePath = path.join(__dirname, '..', 'uploads', test.audioUrl)
-		console.log('Attempting to delete file:', filePath)
+		console.log('File path:', filePath, 'Exists:', fs.existsSync(filePath))
+
 		if (fs.existsSync(filePath)) {
-			await fsPromises.unlink(filePath)
-			console.log('Input audio file deleted.')
+			await fs.promises.unlink(filePath)
+			console.log('File deleted successfully.')
 		} else {
-			console.warn('File not found, skipping unlink.')
+			console.warn('File not found, skipping deletion.')
 		}
 
 		await ListeningTest.findByIdAndDelete(id)
+		console.log('Database entry deleted.')
 		res.json({ message: 'Test deleted successfully' })
 	} catch (err) {
-		console.error('Error deleting Listening Test:', err)
+		console.error('Error during deletion:', err)
 		res.status(500).json({ message: 'Server Error while deleting test' })
 	}
 }
