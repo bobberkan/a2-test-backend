@@ -50,6 +50,9 @@ exports.deleteListeningTest = async (req, res) => {
 		if (!test) {
 			return res.status(404).json({ message: 'Test not found' })
 		}
+		if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+			return res.status(400).json({ message: 'Invalid ID format' })
+		}
 
 		// Delete the audio file
 		const filePath = path.join(__dirname, '..', 'uploads', test.audioUrl)
@@ -57,7 +60,7 @@ exports.deleteListeningTest = async (req, res) => {
 			fs.unlinkSync(filePath)
 		}
 
-		await test.remove()
+		await ListeningTest.findByIdAndDelete(req.params.id)
 		res.json({ message: 'Test deleted successfully' })
 	} catch (err) {
 		console.error('Error deleting Listening Test:', err)
