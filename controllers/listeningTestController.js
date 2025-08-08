@@ -5,14 +5,27 @@ const path = require('path')
 // POST - Yangi test yuklash
 exports.createListeningTest = async (req, res) => {
 	try {
+		console.log('req.body:', req.body)
+		console.log('req.file:', req.file)
+
 		const { title } = req.body
-		const questions = JSON.parse(req.body.questions)
+
+		let questions
+		try {
+			questions =
+				typeof req.body.questions === 'string'
+					? JSON.parse(req.body.questions)
+					: req.body.questions
+		} catch (err) {
+			console.error('Failed to parse questions:', req.body.questions)
+			return res.status(400).json({ error: 'Invalid questions format' })
+		}
 
 		if (!req.file) {
 			return res.status(400).json({ error: 'Audio file is required' })
 		}
 
-		const audioUrl = `/uploads/${req.file.filename}`
+		const audioUrl = req.file.filename
 
 		const newTest = new ListeningTest({
 			title,
@@ -24,7 +37,7 @@ exports.createListeningTest = async (req, res) => {
 		res.status(201).json(newTest)
 	} catch (error) {
 		console.error('Error in createListeningTest:', error)
-		res.status(500).json({ error: 'Server error during test creation' })
+		res.status(500).json({ error: error.message })
 	}
 }
 
