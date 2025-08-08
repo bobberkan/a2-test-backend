@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const listeningTestSchema = new mongoose.Schema({
 	title: { type: String, required: true },
-	audioUrl: { type: String, required: true }, // Serverdan URL shaklida saqlanadi
+	audioUrl: { type: String, required: true },
 	questions: [
 		{
 			questionText: { type: String, required: true },
